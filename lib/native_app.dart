@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 
 class NativeApp extends StatefulWidget {
   const NativeApp({Key? key}) : super(key: key);
@@ -12,7 +10,7 @@ class NativeApp extends StatefulWidget {
 
 class _NativeAppState extends State<NativeApp> {
   static const platform = MethodChannel('com.flutter.dev/info');
-  final String _deviceInfo = 'Unknown info';
+  String _deviceInfo = 'Unknown info';
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +26,22 @@ class _NativeAppState extends State<NativeApp> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // _getDeviceInfo();
+            _getDeviceInfo(platform);
           },
           child: const Icon(Icons.get_app),
         ));
+  }
+
+  Future<void> _getDeviceInfo(MethodChannel methodChannel) async {
+    String deviceInfo;
+    try {
+      final String result = await methodChannel.invokeMethod('getDeviceInfo');
+      deviceInfo = 'Device info : $result';
+    } on PlatformException catch (e) {
+      deviceInfo = 'Failed to get Device info : ${e.toString()}';
+    }
+    setState(() {
+      _deviceInfo = deviceInfo;
+    });
   }
 }
